@@ -1,0 +1,15 @@
+#current_user {
+  padding: 20px;
+}
+#services {
+  border: 1px black solid;
+}
+.services {
+  background-color: dodgerblue;
+  color: white;
+  width: 330px;
+  
+}
+.request_service {
+  margin-bottom: 20px;
+}
