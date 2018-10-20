@@ -18,14 +18,14 @@ App = {
       }
     });
 
-    setInterval(function(){
-      web3.eth.getCoinbase(function(err, account){
-        if(App.current_account !== account) {
-          App.current_account = account;
-          window.location = "localhost";
-        }
-      });     
-    })
+    // setInterval(function(){
+    //   web3.eth.getCoinbase(function(err, account){
+    //     if(App.current_account !== account) {
+    //       App.current_account = account;
+    //       window.location = "localhost";
+    //     }
+    //   });     
+    // })
 
     return App.initContract();
     },
@@ -44,18 +44,35 @@ App = {
   render: function() {
     App.contracts.TimeBank.deployed().then(function(instance){
        service_instance = instance;
+       
+       var current_user = $("#current_user").html();
+       //set hour deposit
+       // instance.setHourDeposit(current_user).then(function(result){
+
+       // })
+
+
+       //check if current user has a service request
+       instance.getServiceReques(current_user).then(function(result){
+          if(result == true) {
+            $("#service_alert").css("display","block");
+          }
+       })
+
        return instance.getFunderAccots();
     }).then(function(result){
       App.accounts = result;
       var count;
-      function append_service(item, i){
-          service_instance.funder(item).then(function(result){
-            $(".account"+i).after("<div class = 'services'>"+result+"</div>"+"<button class='request_service' onclick='App.request_service()'>request</button>")
-          })  
-      };
+
+      function append_service(address, i){
+        service_instance.getServices(address).then(function(result){
+          $(".account"+i).append("<div class = 'services'>"+result+"</div>"+"<button class='request_service' type = 'button' id = 'service'>request</button>")
+        })
+      }
+
       for(var i = 0; i<App.accounts.length; i++ ){
         if(App.accounts[i] != App.current_account){
-          $("#user_list").append("<div class='account"+i+"'>"+App.accounts[i]+"</div>");
+          $("#user_list").append("<div class='account"+i+"'>"+ "<div class = account>"+App.accounts[i]+"</div>"+"</div>");
           count = App.accounts[i];
           append_service(count, i);
         }
@@ -69,23 +86,17 @@ App = {
     App.contracts.TimeBank.deployed().then(function(instance) {
        return instance.addServices( App.current_account ,$("#services").val() );
     }).then(function(result){
-              window.location = "localhost";
             }).catch(function(err){
                 console.log(err);
     })
   },
 
-  // request_service: function() {
-  //   App.contracts.TimeBank.deployed().then(function(instance){
-  //     instance.
-  //   })
-  // }
-
 } // end of app object
+
 
 
 $(function() {
   $(window).load(function() {
     App.init();
-  });
+})
 });

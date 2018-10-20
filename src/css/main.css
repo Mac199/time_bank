@@ -13,3 +13,6 @@
 .request_service {
   margin-bottom: 20px;
 }
+#service_alert {
+  display: none
+}
