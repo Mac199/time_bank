@@ -46,10 +46,25 @@ App = {
        service_instance = instance;
        
        var current_user = $("#current_user").html();
-       //set hour deposit
-       // instance.setHourDeposit(current_user).then(function(result){
 
-       // })
+
+       //set initialization hour deposit
+       instance.getHourInitialized(current_user).then(function(result){
+          if(result == false){
+             instance.setHourDeposit(current_user).then(function(result){
+                instance.setHourInitialized(current_user).then(function(result){
+                  //console.log(result);
+                })
+             })
+          }
+
+          instance.getHourDeposit(current_user).then(function(result){
+            $("#hour_deposit").html(result['c'][0]);
+          })
+
+       })
+       
+
 
 
        //check if current user has a service request
@@ -66,7 +81,7 @@ App = {
 
       function append_service(address, i){
         service_instance.getServices(address).then(function(result){
-          $(".account"+i).append("<div class = 'services'>"+result+"</div>"+"<button class='request_service' type = 'button' id = 'service'>request</button>")
+          $(".account"+i).append("<div class = 'services'>"+result+"</div>"+"<button class='request_service' type = 'button' id = 'service'>give help</button>")
         })
       }
 
@@ -84,6 +99,7 @@ App = {
 
   offer_services: function() {
     App.contracts.TimeBank.deployed().then(function(instance) {
+      console.log($("#hours_needed").val());
        return instance.addServices( App.current_account ,$("#services").val() );
     }).then(function(result){
             }).catch(function(err){
