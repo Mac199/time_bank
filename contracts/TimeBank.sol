@@ -11,6 +11,7 @@ contract TimeBank {
     uint   hourDeposit;
     bool   hourinitialiazed;
     uint   hoursNeeded;
+
   }
   
   mapping (address => Funder) public funder;
@@ -27,10 +28,17 @@ contract TimeBank {
   function setHourDeposit(address _address) public {
     funder[_address].hourDeposit = 10;
   }
-  
+
   function getHourDeposit(address _address) view public returns(uint){
+  return funder[_address].hourDeposit;
+  }
+  
+  function changeHourBalance(address _address, uint hoursNeeded, uint hourDeposit) view public returns(uint){
+    funder[_address].hourDeposit = funder[_address].hourDeposit - funder[_address].hoursNeeded;
     return funder[_address].hourDeposit;
   }
+
+
   
   function setHourInitialized(address _address) {
     funder[_address].hourinitialiazed = true;
@@ -41,12 +49,16 @@ contract TimeBank {
     return funder[_address].hourinitialiazed;
   }
   
-  
 
-
-  function addServices(address _address, string _services) public {  
+  function addServices(address _address, string _services, uint _hoursNeeded) public {  
     funder[_address].services = _services;
+    funder[_address].hoursNeeded = _hoursNeeded;
     funderAccots.push(_address);
+  }
+
+  function clearServices(address _address, string _services, uint _hoursNeeded) public {
+    funder[_address].services = _services;
+    funder[_address].hoursNeeded = _hoursNeeded;
   }
 
   function requestServices(address _address, bool _serviceRequest) public {

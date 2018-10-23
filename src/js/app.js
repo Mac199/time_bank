@@ -18,15 +18,6 @@ App = {
       }
     });
 
-    // setInterval(function(){
-    //   web3.eth.getCoinbase(function(err, account){
-    //     if(App.current_account !== account) {
-    //       App.current_account = account;
-    //       window.location = "localhost";
-    //     }
-    //   });     
-    // })
-
     return App.initContract();
     },
 
@@ -48,24 +39,31 @@ App = {
        var current_user = $("#current_user").html();
 
 
+
+
        //set initialization hour deposit
        instance.getHourInitialized(current_user).then(function(result){
           if(result == false){
              instance.setHourDeposit(current_user).then(function(result){
-                instance.setHourInitialized(current_user).then(function(result){
-                  //console.log(result);
-                })
+
+             })
+             .then(function(){
+               instance.setHourInitialized(current_user).then(function(result){
+                })            
+             })
+             .then(function(){
+                  instance.getHourDeposit(current_user).then(function(result){
+                  $("#hour_deposit").html(result['c'][0]);
+                })    
              })
           }
-
-          instance.getHourDeposit(current_user).then(function(result){
-            $("#hour_deposit").html(result['c'][0]);
-          })
+          else {
+           instance.getHourDeposit(App.current_account).then(function(result){
+           $("#hour_deposit").html(result['c'][0]);
+       })
+          }
 
        })
-       
-
-
 
        //check if current user has a service request
        instance.getServiceReques(current_user).then(function(result){
@@ -77,33 +75,74 @@ App = {
        return instance.getFunderAccots();
     }).then(function(result){
       App.accounts = result;
-      var count;
 
-      function append_service(address, i){
-        service_instance.getServices(address).then(function(result){
-          $(".account"+i).append("<div class = 'services'>"+result+"</div>"+"<button class='request_service' type = 'button' id = 'service'>give help</button>")
-        })
-      }
-
-      for(var i = 0; i<App.accounts.length; i++ ){
-        if(App.accounts[i] != App.current_account){
-          $("#user_list").append("<div class='account"+i+"'>"+ "<div class = account>"+App.accounts[i]+"</div>"+"</div>");
-          count = App.accounts[i];
-          append_service(count, i);
+    function append_service(address, i){
+      service_instance.getServices(address).then(function(result){
+        if(result !== '') {
+            $(".account"+i).append("<div class = 'services'>"+result+"</div>"+"<button class='request_service' type = 'button' id = 'service'>give help</button>");
         }
-      }
+      })
+    };
+
+    function delete_repeating_account (address){
+      
+    }
+    
+    function check_service_exit(address, i) {
+
+      service_instance.getServices(address).then(function(result){
+        if( result !== '' && App.accounts[i] != App.current_account ){
+          $("#user_list").append("<div class='account"+i+"'>"+ "<div class = account>"+App.accounts[i]+"</div>"+"</div>");
+          append_service(App.accounts[i],i);
+        }
+      })
+    };
+
+    for(var i = 0; i<App.accounts.length; i++){
+      check_service_exit(App.accounts[i], i);
+    };
+
+  })
+  }, //end of render()
+
+  offer_services: function() {
+    App.contracts.TimeBank.deployed().then(function(instance) {
+       instance.addServices($("#current_user").html(), $("#services").val(), $("#hours_needed").val());
+       return instance;
+    }).then(function(instance){
     }).catch(function(err){
       console.log(err);
     })
   },
 
-  offer_services: function() {
-    App.contracts.TimeBank.deployed().then(function(instance) {
-      console.log($("#hours_needed").val());
-       return instance.addServices( App.current_account ,$("#services").val() );
-    }).then(function(result){
-            }).catch(function(err){
-                console.log(err);
+  agree: function() {
+
+    App.contracts.TimeBank.deployed()
+
+
+      
+      .then(function(instance){
+        instance.requestServices(App.current_account, false).then(function(){
+          $("#service_alert").hide();
+        })
+       
+      .then(function(){
+
+          return instance.getHoursNeeded(App.current_account);
+
+        })
+      
+      .then(function(result){
+          console.log(result['c'][0]);
+           return instance.changeHourBalance(App.current_account, result['c'][0], $("#hour_deposit").html());
+
+        })
+
+      .then(function(result){
+          $("#hour_deposit").html(result['c'][0]);
+          instance.clearServices(App.current_account, '', 0);
+        })
+
     })
   },
 
