@@ -5,6 +5,7 @@ App = {
   account: '0X0',
   current_account: "",
   accounts: [],
+  unique_accounts: [],
 
   init: function(){
 
@@ -76,20 +77,33 @@ App = {
     }).then(function(result){
       App.accounts = result;
 
+      //remove the duplicated accounts in javascript, record keeps in solidity
+      $.each(App.accounts, function(i,el){
+        if( $.inArray(el, App.unique_accounts) === -1){
+          App.unique_accounts.push(el);
+        }
+      })
+
+
     function append_service(address, i){
       service_instance.getServices(address).then(function(result){
         if(result !== '') {
-            $(".account"+i).append("<div class = 'services'>"+result+"</div>"+"<button class='request_service' type = 'button' id = 'service'>give help</button>");
+            $(".account"+i).append("<div class = 'services'>"+result+"</div>");
         }
+        return address
+      })
+      .then(function(result){
+        service_instance.getHoursNeeded(result).then(function(hours){
+          $(".account"+i).append("<div class='hours clearfix'>"+hours+"</div>"+'<span>hours</span>'+"<button class='request_service' type = 'button' id = 'service'>give help</button>");
+        })
       })
     };
 
-    function delete_repeating_account (address){
-      
+    function delete_repeating_account (i){
+      service_instance.deleteRepeatingAccount(i);
     }
     
     function check_service_exit(address, i) {
-
       service_instance.getServices(address).then(function(result){
         if( result !== '' && App.accounts[i] != App.current_account ){
           $("#user_list").append("<div class='account"+i+"'>"+ "<div class = account>"+App.accounts[i]+"</div>"+"</div>");
@@ -97,6 +111,8 @@ App = {
         }
       })
     };
+
+
 
     for(var i = 0; i<App.accounts.length; i++){
       check_service_exit(App.accounts[i], i);

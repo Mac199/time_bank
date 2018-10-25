@@ -12,6 +12,7 @@ form input {
 }
 .request_service {
   margin-bottom: 20px;
+  margin-left: 30px;
 }
 #service_alert {
   display: none;
@@ -20,4 +21,13 @@ form input {
 }
 #service_submit_form {
   margin-bottom: 50px;
+}
+.hours {
+  width: 15px;
+  float: left;
+}
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
 }

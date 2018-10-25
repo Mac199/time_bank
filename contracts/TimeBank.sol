@@ -38,10 +38,13 @@ contract TimeBank {
     return funder[_address].hourDeposit;
   }
 
-
+  function increaseHourBalance(address _address, uint hoursNeeded) public {
+    funder[_address].hourDeposit = funder[_address].hourDeposit + hoursNeeded;
+  }
   
   function setHourInitialized(address _address) {
     funder[_address].hourinitialiazed = true;
+    funderAccots.push(_address);
   }
 
 
@@ -53,7 +56,7 @@ contract TimeBank {
   function addServices(address _address, string _services, uint _hoursNeeded) public {  
     funder[_address].services = _services;
     funder[_address].hoursNeeded = _hoursNeeded;
-    funderAccots.push(_address);
+    
   }
 
   function clearServices(address _address, string _services, uint _hoursNeeded) public {
@@ -74,6 +77,10 @@ contract TimeBank {
 
   function getFunderAccots() view public returns(address[]){
     return funderAccots;
+  }
+
+  function deleteRepeatingAccount(uint index) public {
+    delete funderAccots[index];
   }
 
 }
