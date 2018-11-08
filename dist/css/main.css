@@ -1,0 +1,33 @@
+#current_user {
+  padding: 20px;
+}
+form input {
+  border: 1px black solid;
+}
+.services {
+  background-color: dodgerblue;
+  color: white;
+  width: 330px;
+  
+}
+.request_service {
+  margin-bottom: 20px;
+  margin-left: 30px;
+}
+#service_alert {
+  display: none;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+#service_submit_form {
+  margin-bottom: 50px;
+}
+.hours {
+  width: 15px;
+  float: left;
+}
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}

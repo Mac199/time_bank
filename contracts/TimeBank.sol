@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+ pragma solidity ^0.4.24;
 
 /**
  * The TimeBank contract reward each user's servicec with hours
