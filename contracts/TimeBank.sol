@@ -33,8 +33,8 @@ contract TimeBank {
   return funder[_address].hourDeposit;
   }
   
-  function changeHourBalance(address _address, uint hoursNeeded, uint hourDeposit) view public returns(uint){
-    funder[_address].hourDeposit = funder[_address].hourDeposit - funder[_address].hoursNeeded;
+  function changeHourBalance(address _address, uint _hoursNeeded, uint _hourDeposit) view public returns(uint){
+    funder[_address].hourDeposit = _hourDeposit - _hoursNeeded;
     return funder[_address].hourDeposit;
   }
 

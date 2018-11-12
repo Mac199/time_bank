@@ -121,11 +121,8 @@ App = {
   offer_services: function() {
     App.contracts.TimeBank.deployed().then(function(instance) {
        instance.addServices($("#current_user").html(), $("#services").val(), $("#hours_needed").val());
-       console.log($("#hours_needed").val());
+
        return instance;
-    }).then(function(instance){
-    }).catch(function(err){
-      console.log(err);
     })
   },
 

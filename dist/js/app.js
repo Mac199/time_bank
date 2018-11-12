@@ -39,9 +39,6 @@ App = {
        
        var current_user = $("#current_user").html();
 
-
-
-
        //set initialization hour deposit
        instance.getHourInitialized(current_user).then(function(result){
           if(result == false){
@@ -124,6 +121,7 @@ App = {
   offer_services: function() {
     App.contracts.TimeBank.deployed().then(function(instance) {
        instance.addServices($("#current_user").html(), $("#services").val(), $("#hours_needed").val());
+       console.log($("#hours_needed").val());
        return instance;
     }).then(function(instance){
     }).catch(function(err){

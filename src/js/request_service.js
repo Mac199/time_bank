@@ -13,12 +13,10 @@ $(document).ready(function(){
         return instance;
     })
       .then(function(instance){
-        console.log(hours);
-        console.log( $("#current_user").text() );
         return instance.increaseHourBalance( $("#current_user").text(), hours);
 
     }).then(function(result){
-      console.log(result);
+
     })
   });
 })
