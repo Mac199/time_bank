@@ -5,12 +5,13 @@ App = {
   account: '0X0',
   current_account: "",
   accounts: [],
-  unique_accounts: [],
+  admin: "0x538efe6cc766900a30b7dc23bf060b2538c766b6",
 
   init: function(){
 
     App.web3Provider = web3.currentProvider;
     web3 = new Web3(web3.currentProvider);
+
     //Load account data
     web3.eth.getCoinbase(function(err, account) {
       if (err === null) {
@@ -23,139 +24,60 @@ App = {
     },
 
   initContract: function() {
-    $.getJSON("TimeBank.json", function(timebank) {
+    $.getJSON("TimeBankToken.json", function(timebanktoken) {
       
       // Instantiate a new truffle contract from the artifact
-      App.contracts.TimeBank = TruffleContract(timebank);
+      App.contracts.TimeBankToken = TruffleContract(timebanktoken);
       // Connect provider to interact with contract
-      App.contracts.TimeBank.setProvider(App.web3Provider);
-      return App.render();
+      App.contracts.TimeBankToken.setProvider(App.web3Provider);
+      
+    }).then(function(){
+        $.getJSON("userService.json", function(userService){
+          App.contracts.userService = TruffleContract(userService);
+          App.contracts.userService.setProvider(App.web3Provider);
+          
+        }).then(function(){
+          $.getJSON("tokenSale.json", function(tokenSale){
+            App.contracts.tokenSale = TruffleContract(tokenSale);
+            App.contracts.tokenSale.setProvider(App.web3Provider);
+            return App.render();
+          })
+        });      
     });
   },
 
   render: function() {
-    App.contracts.TimeBank.deployed().then(function(instance){
-       service_instance = instance;
-       
-       var current_user = $("#current_user").html();
-
-       //set initialization hour deposit
-       instance.getHourInitialized(current_user).then(function(result){
-          if(result == false){
-             instance.setHourDeposit(current_user).then(function(result){
-
-             })
-             .then(function(){
-               instance.setHourInitialized(current_user).then(function(result){
-                })            
-             })
-             .then(function(){
-                  instance.getHourDeposit(current_user).then(function(result){
-                  $("#hour_deposit").html(result['c'][0]);
-                })    
-             })
-          }
-          else {
-           instance.getHourDeposit(App.current_account).then(function(result){
-           $("#hour_deposit").html(result['c'][0]);
-       })
-          }
-
-       })
-
-       //check if current user has a service request
-       instance.getServiceReques(current_user).then(function(result){
-          if(result == true) {
-            $("#service_alert").css("display","block");
-          }
-       })
-
-       return instance.getFunderAccots();
-    }).then(function(result){
-      App.accounts = result;
-
-      //remove the duplicated accounts in javascript, record keeps in solidity
-      $.each(App.accounts, function(i,el){
-        if( $.inArray(el, App.unique_accounts) === -1){
-          App.unique_accounts.push(el);
-        }
+    App.contracts.TimeBankToken.deployed().then(function(instance){
+      var time_bank_token = instance;
+      time_bank_token.balanceOf(App.admin).then(function(i){
+        var balance = i.toNumber();
+        
+        if(App.current_account == App.admin){
+          console.log(time_bank_token.address);
+          time_bank_token.transfer(time_bank_token.address, 10);
+        } 
       })
-
-
-    function append_service(address, i){
-      service_instance.getServices(address).then(function(result){
-        if(result !== '') {
-            $(".account"+i).append("<div class = 'services'>"+result+"</div>");
-        }
-        return address
-      })
-      .then(function(result){
-        service_instance.getHoursNeeded(result).then(function(hours){
-          $(".account"+i).append("<div class='hours clearfix'>"+hours+"</div>"+'<span>hours</span>'+"<button class='request_service' type = 'button' id = 'service'>give help</button>");
-        })
-      })
-    };
-
-    function delete_repeating_account (i){
-      service_instance.deleteRepeatingAccount(i);
-    }
-    
-    function check_service_exit(address, i) {
-      service_instance.getServices(address).then(function(result){
-        if( result !== '' && App.accounts[i] != App.current_account ){
-          $("#user_list").append("<div class='account"+i+"'>"+ "<div class = account>"+App.accounts[i]+"</div>"+"</div>");
-          append_service(App.accounts[i],i);
-        }
-      })
-    };
-
-
-
-    for(var i = 0; i<App.accounts.length; i++){
-      check_service_exit(App.accounts[i], i);
-    };
-
-  })
-  }, //end of render()
-
-  offer_services: function() {
-    App.contracts.TimeBank.deployed().then(function(instance) {
-       instance.addServices($("#current_user").html(), $("#services").val(), $("#hours_needed").val());
-
-       return instance;
+      return time_bank_token.balanceOf(App.current_account);
+    }).then(function(balance_current_account){
+      balance_current_account = balance_current_account.toNumber();
+      $("#hour_deposit").html(balance_current_account);
     })
   },
+  
+  transfer_tokens: function() {
+    App.contracts.TimeBankToken.deployed().then(function(instance){
+      var time_bank_token = instance;
 
-  agree: function() {
+      return time_bank_token.transfer(App.current_account, 5);
 
-    App.contracts.TimeBank.deployed()
-
-
-      
-      .then(function(instance){
-        instance.requestServices(App.current_account, false).then(function(){
-          $("#service_alert").hide();
-        })
-       
-      .then(function(){
-
-          return instance.getHoursNeeded(App.current_account);
-
-        })
-      
-      .then(function(result){
-          console.log(result['c'][0]);
-           return instance.changeHourBalance(App.current_account, result['c'][0], $("#hour_deposit").html());
-
-        })
-
-      .then(function(result){
-          $("#hour_deposit").html(result['c'][0]);
-          instance.clearServices(App.current_account, '', 0);
-        })
-
-    })
-  },
+      //return App.contracts.userService.deployed();
+     })//.then(function(instance){
+       //return instance.setInitialization(true);
+     //})
+     .then(function(result){
+       console.log(result);
+     })
+  }
 
 } // end of app object
 
