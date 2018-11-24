@@ -24,60 +24,92 @@ App = {
     },
 
   initContract: function() {
-    $.getJSON("TimeBankToken.json", function(timebanktoken) {
+    $.getJSON("TimeBank.json", function(TimeBank) {
       
       // Instantiate a new truffle contract from the artifact
-      App.contracts.TimeBankToken = TruffleContract(timebanktoken);
+      App.contracts.TimeBank = TruffleContract(TimeBank);
       // Connect provider to interact with contract
-      App.contracts.TimeBankToken.setProvider(App.web3Provider);
-      
-    }).then(function(){
-        $.getJSON("userService.json", function(userService){
-          App.contracts.userService = TruffleContract(userService);
-          App.contracts.userService.setProvider(App.web3Provider);
-          
-        }).then(function(){
-          $.getJSON("tokenSale.json", function(tokenSale){
-            App.contracts.tokenSale = TruffleContract(tokenSale);
-            App.contracts.tokenSale.setProvider(App.web3Provider);
-            return App.render();
-          })
-        });      
-    });
-  },
+      App.contracts.TimeBank.setProvider(App.web3Provider);
+      return App.render();
+    })
+},
 
   render: function() {
-    App.contracts.TimeBankToken.deployed().then(function(instance){
-      var time_bank_token = instance;
-      time_bank_token.balanceOf(App.admin).then(function(i){
-        var balance = i.toNumber();
-        
-        if(App.current_account == App.admin){
-          console.log(time_bank_token.address);
-          time_bank_token.transfer(time_bank_token.address, 10);
-        } 
+    var time_bank;
+
+    function getServiceHour(i, list){
+      App.contracts.TimeBank.deployed().then(function(instance){
+        return instance.user(list[i]);
+      }).then(function(result){
+        if(list[i] !== App.current_account && result[0] != ''){
+          $('#user_list').append('<div id =account'+i+'>'+list[i]+'</div>');
+          $('#account'+i).addClass(list[i]);
+          $('#account'+i).append('<span class="services">'+result[0]+'</span>'+'<span class="hours">'+result[2]['c'][0]+'hours</span>'+
+            '<button class = "offer_service" id=user'+i+'>give help</button>');  
+        }
       })
-      return time_bank_token.balanceOf(App.current_account);
-    }).then(function(balance_current_account){
-      balance_current_account = balance_current_account.toNumber();
-      $("#hour_deposit").html(balance_current_account);
+    };
+
+    App.contracts.TimeBank.deployed().then(function(instance){
+      time_bank = instance;
+      return time_bank.user(App.current_account);
+    })
+    .then(function(result){
+      if(result[4]  == false) {
+        time_bank.addUser('', 10, 0, App.current_account, true,false);
+        time_bank.initializedEvent({},{
+          fromBlock: 0,
+          toBlock: 'latest'
+        }).watch(function(error, event){
+          App.init_hour();
+        })
+      }else{
+        App.init_hour();
+      }
+      return time_bank.getUserAccounts(); 
+    })
+    .then(function(result){
+
+      for(var i = 0; i< result.length; i++){
+        getServiceHour(i, result)
+      }
+      return time_bank.getHelp(App.current_account);
+    })
+    .then(function(result){
+      if(result == true){
+        $('#service_alert').show();
+      }
     })
   },
-  
-  transfer_tokens: function() {
-    App.contracts.TimeBankToken.deployed().then(function(instance){
-      var time_bank_token = instance;
 
-      return time_bank_token.transfer(App.current_account, 5);
+  agree: function(){
 
-      //return App.contracts.userService.deployed();
-     })//.then(function(instance){
-       //return instance.setInitialization(true);
-     //})
-     .then(function(result){
-       console.log(result);
-     })
-  }
+  },
+
+  init_hour: function() {
+    var time_bank;
+    App.contracts.TimeBank.deployed().then(function(instance){
+      time_bank = instance;
+      return instance.user(App.current_account);
+    }).then(function(result){
+      $("#hour_deposit").html(result[1].toNumber());
+    })
+  },
+
+
+  request_service: function(){
+    var time_bank;
+    App.contracts.TimeBank.deployed().then(function(instance){
+      time_bank = instance;
+      return $('#services').val();
+    })
+    .then(function(services){
+      time_bank.setServiceHour(services, App.current_account,$('#hours_needed').val());
+    })
+
+  },
+
+
 
 } // end of app object
 

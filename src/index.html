@@ -26,13 +26,13 @@
           <hr/>
           <br/>
           <div id="current_user"></div>
-          <button id="buy_tokens" onclick="App.transfer_tokens()">transfer tokens</button>
+     <!--      <button id="buy_tokens" onclick="App.initialize_hour()">initialize hour</button> -->
           <div>you have <span id="hour_deposit"></span> hours deposit</div>  
           <div id="service_alert">
             <div id="service_request">A user wants to help you</div>
             <button id="agree_request" onclick="App.agree()">agree</button>
           </div>
-          <form id="service_submit_form" onSubmit="App.offer_services(); return false">
+          <form id="service_submit_form" onSubmit="App.request_service(); return false">
             <label for=""> ask for help and submit!</label>
             <input id="services" name="services" type="text">
             <label for="">please select hours needed</label>
@@ -67,6 +67,6 @@
     <script src="js/web3.min.js"></script>
     <script src="js/truffle-contract.js"></script>
     <script src="js/app.js"></script>
-    <script src="js/request_service.js"></script>
+    <script src="js/offer_service.js"></script>
   </body>
 </html>
