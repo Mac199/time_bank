@@ -56,7 +56,7 @@ App = {
     })
     .then(function(result){
       if(result[4]  == false) {
-        time_bank.addUser('', 10, 0, App.current_account, true,false);
+        time_bank.addUser('', 10, 0, App.current_account, true,false, '',false);
         time_bank.initializedEvent({},{
           fromBlock: 0,
           toBlock: 'latest'
@@ -78,12 +78,32 @@ App = {
     .then(function(result){
       if(result == true){
         $('#service_alert').show();
+        
+        return time_bank.user(App.current_account);
       }
+      else return '';
+    })
+    .then(function(result){
+      $('#provider').html(result[6]);
     })
   },
 
   agree: function(){
-
+    var time_bank;
+    App.contracts.TimeBank.deployed().then(function(instance){
+      time_bank = instance
+      return instance.user(App.current_account);
+    }).then(function(result){
+      hours_needed = result[2].toNumber();
+      time_bank.balanceSetCheck(App.current_account, $('#provider').html(), hours_needed, true);
+      time_bank.balanceChange({},{
+        fromBlock: 0,
+        toBlock: 'latest'
+      }).watch(function(error, event){
+        App.init_hour();
+        $('#service_alert').hide();
+      })
+    })
   },
 
   init_hour: function() {

@@ -4,12 +4,10 @@ $(document).ready(function(){
   $(document).on('click', '.offer_service', function(){
 
       var user = $(this).parent().attr('class');
-      console.log(user);
-
-              
-      
+      var time_bank;
       App.contracts.TimeBank.deployed().then(function(instance){
-        instance.setHelp(true,user);
+        time_bank = instance;
+        instance.setHelpProvider(true,user,$('#current_user').html());
     })
   });
 })
