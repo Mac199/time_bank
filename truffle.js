@@ -5,7 +5,8 @@ module.exports = {
     development: {
       host: "localhost",
       port: 7545,
-      network_id: "*",
+      network_id: "44",
+      gas: 4712388
     },
     rinkeby: {
       host: 'localhost',
